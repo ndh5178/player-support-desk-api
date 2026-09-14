@@ -1,6 +1,6 @@
 # API 계약과 Vue 연결 설계
 
-상태: GET /api/health만 구현되어 있다. 아래 문의 API는 기존 Vue·MSW 계약을 옮길 설계다.
+상태: 문의 목록·상세와 담당자 조회를 구현했다. 변경·메모·대시보드는 구현 전이다.
 
 ## 확인한 근거
 
@@ -91,6 +91,8 @@ interface Inquiry {
 
 ## GET /api/inquiries
 
+구현됨. InquiryController → InquiryService → InquiryRepository 흐름으로 처리한다.
+
 | Query | 생략 시 기본값 | 규칙 |
 | --- | --- | --- |
 | search | 빈 문자열 | 앞뒤 공백 제거, ID·제목·고객 닉네임 중 부분 일치 |
@@ -123,11 +125,15 @@ total은 필터 후 전체 개수, totalPages는 ceil(total / limit)이다.
 
 ## GET /api/inquiries/{id}
 
+구현됨. 고객·담당자와 문의 ID에 연결된 메모·이력을 조합한다.
+
 예: GET /api/inquiries/INQ-2026-0001.
 성공 본문은 Inquiry 객체 하나다. notes와 history를 포함한다.
 별도 메모 조회 API는 현재 없다. 없는 문의의 메시지는 '요청한 문의를 찾을 수 없습니다.'다.
 
 ## GET /api/agents
+
+구현됨. 담당자 ID 오름차순으로 반환한다.
 
 성공 본문: `{ data: Agent[] }`.
 담당자 선택 UI가 사용하므로 상세 화면 연결 단계에 함께 구현한다.

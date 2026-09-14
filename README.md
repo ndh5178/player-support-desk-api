@@ -11,10 +11,11 @@
 - PostgreSQL 17.11, Spring Data JPA, Flyway
 - 고객·담당자·문의·운영 메모·변경 이력 테이블
 - 기존 Mock을 옮긴 로컬 초기 데이터
+- 문의 목록·상세 및 담당자 조회 API
 - GET /api/health: HTTP 200과 `{"status":"UP"}` 응답
 - 실제 내장 서버를 사용하는 HTTP 통합 테스트
 
-현재 문의 API·인증·Vue 실제 서버 연결은 구현 전이다.
+현재 변경 API·대시보드·인증·Vue 실제 서버 연결은 구현 전이다.
 health 성공은 문의 조회나 전체 서비스 정상 동작을 보장하지 않는다.
 
 ## Windows PowerShell 실행
@@ -62,6 +63,22 @@ curl.exe -i http://localhost:8080/api/health
 서버 종료는 실행 터미널에서 Ctrl+C를 누른다.
 8080 포트가 사용 중이면 `--args="--server.port=8081"`을 bootRun 뒤에 붙이고 확인 주소도 바꾼다.
 
+조회 API는 새 터미널에서 확인한다.
+
+```powershell
+curl.exe "http://localhost:8080/api/inquiries"
+curl.exe "http://localhost:8080/api/inquiries?status=NEW&sort=newest&page=1&limit=10"
+curl.exe "http://localhost:8080/api/inquiries/INQ-2026-0001"
+curl.exe "http://localhost:8080/api/agents"
+```
+
+잘못된 목록 조건과 없는 문의의 오류 응답도 확인할 수 있다.
+
+```powershell
+curl.exe -i "http://localhost:8080/api/inquiries?page=0"
+curl.exe -i "http://localhost:8080/api/inquiries/INQ-NOT-FOUND"
+```
+
 ## 테스트와 배포 파일 생성
 
 ```powershell
@@ -91,7 +108,7 @@ macOS/Linux에서는 `./gradlew`를 사용한다.
 - [검증 기록](docs/QA_CHECKLIST.md)
 - `study/`: Git에서 제외한 개인 학습 문서
 
-문의 조회 API는 다음 작업에서 추가한다.
+Vue 실제 서버 모드 연결은 다음 작업에서 추가한다.
 공개 배포와 인증·권한 검증은 아직 진행하지 않았다.
 
 DB만 중지하려면 `docker compose stop database`, 다시 시작하려면
