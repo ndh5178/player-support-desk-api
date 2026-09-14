@@ -6,7 +6,7 @@
 
 - Spring Boot 실행 코드와 Gradle Wrapper
 - HTTP 200, application/json, status=UP 확인 테스트
-- Git 작업 규칙과 PR 템플릿
+- Git 작업 규칙
 - 실행 방법과 study/의 첫 HTTP 요청 학습 문서
 
 이 API는 애플리케이션의 HTTP 응답 확인용이다. DB, 인증, Vue 연결은 포함하지 않는다.
