@@ -47,3 +47,16 @@ customers, agents, inquiries, inquiry_notes, inquiry_histories로 분리한다.
 대시보드는 문의 원본에서 집계하며 중복 저장하지 않는다.
 동시 수정과 인증은 후속 단계에서 별도 정책을 정한다.
 상세 컬럼은 [DB 설계](DATABASE_DESIGN.md), 실행 계약은 [API 계약](API_CONTRACT.md)을 따른다.
+
+## PostgreSQL 로컬 실행과 마이그레이션
+
+PostgreSQL 17.11을 Docker Compose로 실행하고 호스트의 127.0.0.1에만 DB 포트를 연결한다.
+`.env`를 Compose와 Spring이 함께 사용하며 실제 파일은 Git에서 제외한다.
+공통 스키마는 Flyway `db/migration`, 가상 데이터는 `db/local`에 둔다.
+local 프로필에서만 두 위치를 함께 읽어 공개 환경에 가상 문의가 자동 삽입되지 않게 한다.
+Spring Boot 4의 Flyway 자동 구성을 포함하는 `spring-boot-starter-flyway`를 사용한다.
+application.yml은 APP_PROFILE의 기본값을 local로 두어 로컬 시드 위치를 활성화한다.
+Hibernate는 `ddl-auto=validate`로 두어 테이블 생성은 Flyway만 담당한다.
+
+JPA 관계는 문의에서 고객·담당자를 참조하고, 메모·이력에서 문의를 참조하는 단방향으로 시작한다.
+컬렉션은 목록 API의 조회 방법을 정할 때 추가하며 엔티티를 API 응답으로 직접 반환하지 않는다.
