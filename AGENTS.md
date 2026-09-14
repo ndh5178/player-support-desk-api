@@ -3,6 +3,7 @@
 이 저장소는 기존 Vue 프로젝트와 연결할 Java 백엔드 학습 프로젝트다.
 작업 전에 README.md, docs/IMPLEMENTATION_PLAN.md, docs/DECISIONS.md,
 docs/GIT_WORKFLOW.md, docs/QA_CHECKLIST.md를 읽는다.
+DB·문의 API 작업 전에는 docs/DATABASE_DESIGN.md와 docs/API_CONTRACT.md도 읽는다.
 
 - 사용자 최신 요구사항을 우선한다. 실행 흐름을 설명할 수 있는 코드를 작성한다.
 - 기존 프론트엔드의 API 호출, MSW 핸들러, 타입, Store와 테스트로 계약을 확인한다.

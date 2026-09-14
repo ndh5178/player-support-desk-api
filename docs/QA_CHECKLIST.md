@@ -18,3 +18,12 @@
 현재 JDK 21에서 테스트는 통과했으며 이후 JDK 변경 시 agent 설정을 검토한다.
 DB·인증·Vue 연결과 macOS/Linux 실행은 이번 검증 대상이 아니다.
 UI를 변경하지 않아 프론트엔드 테스트는 재실행하지 않았다.
+
+## DB·API 설계 문서 — 2026-09-14
+
+- [x] 기존 Vue 타입·API 호출·MSW 핸들러와 문서의 필드·경로·검증 규칙 대조
+- [x] Markdown 내부 문서 링크와 코드 블록 닫힘 확인
+- [x] `gradlew.bat clean build --offline --no-daemon` 성공, 기존 HTTP 테스트 1건 통과
+- [x] `git diff --check` 통과
+
+문서만 변경했다. DB 스키마 실행, 문의 API와 Vue 실제 연결은 검증 전이다.

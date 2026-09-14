@@ -38,3 +38,12 @@ SpringBootTest RANDOM_PORT로 실제 내장 서버를 시작한다.
 Java HttpClient로 상태 코드, Content-Type, JSON 내용을 검증한다.
 테스트 포트는 임의로 배정해 개발용 8080 포트와 충돌하지 않게 한다.
 HTTP 요청에는 5초 제한을 두며 테스트 종료 시 클라이언트를 닫는다.
+
+## 문의 DB·API 설계
+
+customers, agents, inquiries, inquiry_notes, inquiry_histories로 분리한다.
+기존 문자열 ID와 전체 Inquiry 응답을 유지하고 서버 DTO에서 관계를 조합한다.
+이메일·닉네임 유일성이나 제목 길이처럼 기존에 없는 정책을 임의로 추가하지 않는다.
+대시보드는 문의 원본에서 집계하며 중복 저장하지 않는다.
+동시 수정과 인증은 후속 단계에서 별도 정책을 정한다.
+상세 컬럼은 [DB 설계](DATABASE_DESIGN.md), 실행 계약은 [API 계약](API_CONTRACT.md)을 따른다.
