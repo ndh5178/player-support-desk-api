@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -32,6 +33,15 @@ public class GlobalExceptionHandler {
                 "올바른 JSON 요청 본문이 필요합니다.");
 
         return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiErrorResponse> handleAuthentication(AuthenticationException exception) {
+        ApiErrorResponse body = ApiErrorResponse.of(
+                "INVALID_CREDENTIALS",
+                "아이디 또는 비밀번호가 올바르지 않습니다.");
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
 
     @ExceptionHandler(InquiryNotFoundException.class)

@@ -15,10 +15,12 @@
 - 문의 상태·담당자 변경과 변경 이력 저장 API
 - 운영 메모 등록과 메모 이력 저장 API
 - 문의 상태·SLA·우선순위와 최근 문의를 계산하는 대시보드 API
+- Spring Security 세션·쿠키 인증과 CSRF 보호
+- 로그인한 담당자를 변경 이력과 메모 작성자로 저장
 - GET /api/health: HTTP 200과 `{"status":"UP"}` 응답
 - 실제 내장 서버를 사용하는 HTTP 통합 테스트
 
-현재 인증은 구현 전이다. 별도 Vue 프로젝트는 실제 API 모드에서 조회·변경·대시보드 API를 같은 요청 계약으로 호출한다.
+별도 Vue 프로젝트는 실제 API 모드에서 로그인 후 조회·변경·대시보드 API를 같은 요청 계약으로 호출한다.
 health 성공은 문의 조회나 전체 서비스 정상 동작을 보장하지 않는다.
 
 ## Windows PowerShell 실행
@@ -66,29 +68,39 @@ curl.exe -i http://localhost:8080/api/health
 서버 종료는 실행 터미널에서 Ctrl+C를 누른다.
 8080 포트가 사용 중이면 `--args="--server.port=8081"`을 bootRun 뒤에 붙이고 확인 주소도 바꾼다.
 
-조회 API는 새 터미널에서 확인한다.
+`/api/health`와 `/api/auth/session`을 제외한 업무 API는 로그인이 필요하다. 로컬 계정은 포트폴리오 시드 전용이며 모든 계정의 비밀번호는 `password`다.
+
+| 아이디 | 담당자 | 팀 |
+| --- | --- | --- |
+| `seoyun` | 김서윤 | Player Care |
+| `minjun` | 박민준 | Technical Support |
+| `avery` | Avery Chen | Account & Payment |
+| `mina` | Mina Patel | Safety Operations |
+
+PowerShell에서는 세션 쿠키와 CSRF 토큰을 유지한 뒤 API를 확인한다.
 
 ```powershell
-curl.exe "http://localhost:8080/api/inquiries"
-curl.exe "http://localhost:8080/api/inquiries?status=NEW&sort=newest&page=1&limit=10"
-curl.exe "http://localhost:8080/api/inquiries/INQ-2026-0001"
-curl.exe "http://localhost:8080/api/agents"
-curl.exe "http://localhost:8080/api/dashboard"
+$webSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+$session = Invoke-RestMethod -Uri "http://localhost:8080/api/auth/session" -WebSession $webSession
+$csrfHeaders = @{ "X-XSRF-TOKEN" = $session.csrfToken }
+$loginBody = @{ username = "seoyun"; password = "password" } | ConvertTo-Json
+
+Invoke-RestMethod -Method Post -Uri "http://localhost:8080/api/auth/login" -WebSession $webSession -Headers $csrfHeaders -ContentType "application/json" -Body $loginBody
+Invoke-RestMethod -Uri "http://localhost:8080/api/inquiries" -WebSession $webSession
+Invoke-RestMethod -Uri "http://localhost:8080/api/dashboard" -WebSession $webSession
 ```
 
-잘못된 목록 조건과 없는 문의의 오류 응답도 확인할 수 있다.
+로그인하지 않은 업무 API 요청은 `401 AUTHENTICATION_REQUIRED`를 반환한다. 잘못된 로그인 정보는 `401 INVALID_CREDENTIALS`를 반환한다.
 
 ```powershell
-curl.exe -i "http://localhost:8080/api/inquiries?page=0"
-curl.exe -i "http://localhost:8080/api/inquiries/INQ-NOT-FOUND"
+Invoke-WebRequest -Uri "http://localhost:8080/api/inquiries" -SkipHttpErrorCheck
 ```
 
 변경 API는 다음 요청으로 확인한다. 로컬 인증 전에는 `agent-001`이 작업한 것으로 기록된다.
 
 ```powershell
-curl.exe -X PATCH "http://localhost:8080/api/inquiries/INQ-2026-0001" -H "Content-Type: application/json" --data-raw '{"status":"IN_PROGRESS"}'
-curl.exe -X PATCH "http://localhost:8080/api/inquiries/INQ-2026-0001" -H "Content-Type: application/json" --data-raw '{"assigneeId":"agent-002"}'
-curl.exe -X POST "http://localhost:8080/api/inquiries/INQ-2026-0001/notes" -H "Content-Type: application/json" --data-raw '{"content":"인증 메일 발송 로그를 확인했습니다."}'
+$statusBody = @{ status = "IN_PROGRESS" } | ConvertTo-Json
+Invoke-RestMethod -Method Patch -Uri "http://localhost:8080/api/inquiries/INQ-2026-0001" -WebSession $webSession -Headers $csrfHeaders -ContentType "application/json" -Body $statusBody
 ```
 
 변경 후 상세 조회에서 현재 상태·담당자·메모·이력을 확인한다. 같은 상태나 담당자를 다시 보내면 새 이력과 `updatedAt`을 만들지 않는다.
@@ -112,7 +124,8 @@ macOS/Linux에서는 `./gradlew`를 사용한다.
 - `src/main/resources/application.yml`: 앱 이름과 로컬 서버 주소·포트
 - `compose.yaml`: 로컬 PostgreSQL 컨테이너와 데이터 볼륨
 - `src/main/resources/db/migration/`: 모든 환경에서 사용하는 DB 스키마
-- `src/main/resources/db/local/`: local 프로필에서만 넣는 가상 초기 데이터
+- `src/main/resources/db/local/`: local 프로필에서만 넣는 가상 초기 데이터와 로그인 계정
+- `auth/`: 로그인, 세션, Spring Security와 현재 담당자 확인
 - `src/test/`: 자동화 테스트
 - [작업 순서](docs/IMPLEMENTATION_PLAN.md)
 - [DB 컬럼·관계 설계](docs/DATABASE_DESIGN.md)
@@ -122,8 +135,8 @@ macOS/Linux에서는 `./gradlew`를 사용한다.
 - [검증 기록](docs/QA_CHECKLIST.md)
 - `study/`: Git에서 제외한 개인 학습 문서
 
-Vue 실제 API 모드의 전체 흐름 검증과 자동 E2E 테스트는 후속 작업에서 진행한다.
-공개 배포와 인증·권한 검증은 아직 진행하지 않았다.
+세분화된 역할 권한, 비밀번호 변경·복구와 자동 E2E 테스트는 후속 범위다.
+공개 배포는 아직 진행하지 않았다.
 
 DB만 중지하려면 `docker compose stop database`, 다시 시작하려면
 `docker compose start database`를 사용한다. 데이터 볼륨 삭제는 초기화가 필요한 경우에만 별도로 진행한다.
