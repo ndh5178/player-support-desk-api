@@ -1,6 +1,7 @@
 package com.ndh5178.playersupportdesk.inquiry.history;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import com.ndh5178.playersupportdesk.inquiry.Inquiry;
 import jakarta.persistence.Column;
@@ -45,6 +46,44 @@ public class InquiryHistory {
     private Instant createdAt;
 
     protected InquiryHistory() {
+    }
+
+    private InquiryHistory(
+            String id,
+            Inquiry inquiry,
+            InquiryHistoryType type,
+            String actorName,
+            String description,
+            String previousValue,
+            String nextValue,
+            Instant createdAt) {
+        this.id = id;
+        this.inquiry = inquiry;
+        this.type = type;
+        this.actorName = actorName;
+        this.description = description;
+        this.previousValue = previousValue;
+        this.nextValue = nextValue;
+        this.createdAt = createdAt;
+    }
+
+    public static InquiryHistory create(
+            Inquiry inquiry,
+            InquiryHistoryType type,
+            String actorName,
+            String description,
+            String previousValue,
+            String nextValue,
+            Instant createdAt) {
+        return new InquiryHistory(
+                "history-" + UUID.randomUUID(),
+                inquiry,
+                type,
+                actorName,
+                description,
+                previousValue,
+                nextValue,
+                createdAt);
     }
 
     public String getId() {

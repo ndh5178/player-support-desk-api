@@ -12,10 +12,12 @@
 - 고객·담당자·문의·운영 메모·변경 이력 테이블
 - 기존 Mock을 옮긴 로컬 초기 데이터
 - 문의 목록·상세 및 담당자 조회 API
+- 문의 상태·담당자 변경과 변경 이력 저장 API
+- 운영 메모 등록과 메모 이력 저장 API
 - GET /api/health: HTTP 200과 `{"status":"UP"}` 응답
 - 실제 내장 서버를 사용하는 HTTP 통합 테스트
 
-현재 변경 API·대시보드·인증·Vue 실제 서버 연결은 구현 전이다.
+현재 대시보드·인증은 구현 전이다. 별도 Vue 프로젝트는 실제 API 조회 모드를 지원하며 변경 API도 같은 요청 계약으로 호출한다.
 health 성공은 문의 조회나 전체 서비스 정상 동작을 보장하지 않는다.
 
 ## Windows PowerShell 실행
@@ -79,6 +81,16 @@ curl.exe -i "http://localhost:8080/api/inquiries?page=0"
 curl.exe -i "http://localhost:8080/api/inquiries/INQ-NOT-FOUND"
 ```
 
+변경 API는 다음 요청으로 확인한다. 로컬 인증 전에는 `agent-001`이 작업한 것으로 기록된다.
+
+```powershell
+curl.exe -X PATCH "http://localhost:8080/api/inquiries/INQ-2026-0001" -H "Content-Type: application/json" --data-raw '{"status":"IN_PROGRESS"}'
+curl.exe -X PATCH "http://localhost:8080/api/inquiries/INQ-2026-0001" -H "Content-Type: application/json" --data-raw '{"assigneeId":"agent-002"}'
+curl.exe -X POST "http://localhost:8080/api/inquiries/INQ-2026-0001/notes" -H "Content-Type: application/json" --data-raw '{"content":"인증 메일 발송 로그를 확인했습니다."}'
+```
+
+변경 후 상세 조회에서 현재 상태·담당자·메모·이력을 확인한다. 같은 상태나 담당자를 다시 보내면 새 이력과 `updatedAt`을 만들지 않는다.
+
 ## 테스트와 배포 파일 생성
 
 ```powershell
@@ -108,7 +120,7 @@ macOS/Linux에서는 `./gradlew`를 사용한다.
 - [검증 기록](docs/QA_CHECKLIST.md)
 - `study/`: Git에서 제외한 개인 학습 문서
 
-Vue 실제 서버 모드 연결은 다음 작업에서 추가한다.
+대시보드 집계와 Vue 실제 API 모드 전체 흐름 검증은 다음 작업에서 진행한다.
 공개 배포와 인증·권한 검증은 아직 진행하지 않았다.
 
 DB만 중지하려면 `docker compose stop database`, 다시 시작하려면

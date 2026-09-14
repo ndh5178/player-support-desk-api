@@ -1,6 +1,6 @@
 # DB 설계
 
-상태: Flyway 테이블·로컬 시드와 JPA 모델을 구현했다. 실행 검증은 아직 하지 않았다.
+상태: Flyway 테이블·로컬 시드와 JPA 모델, 문의 변경·메모 저장 흐름을 구현했다. 변경 API 실행 검증은 아직 하지 않았다.
 기존 Vue의 Inquiry, Customer, Agent, InquiryNote, InquiryHistory를 기준으로 한다.
 응답 계약은 [API_CONTRACT.md](API_CONTRACT.md)를 함께 읽는다.
 

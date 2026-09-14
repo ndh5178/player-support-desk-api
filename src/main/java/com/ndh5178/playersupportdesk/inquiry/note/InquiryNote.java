@@ -1,6 +1,7 @@
 package com.ndh5178.playersupportdesk.inquiry.note;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import com.ndh5178.playersupportdesk.agent.Agent;
 import com.ndh5178.playersupportdesk.inquiry.Inquiry;
@@ -35,6 +36,32 @@ public class InquiryNote {
     private Instant createdAt;
 
     protected InquiryNote() {
+    }
+
+    private InquiryNote(
+            String id,
+            Inquiry inquiry,
+            Agent author,
+            String content,
+            Instant createdAt) {
+        this.id = id;
+        this.inquiry = inquiry;
+        this.author = author;
+        this.content = content;
+        this.createdAt = createdAt;
+    }
+
+    public static InquiryNote create(
+            Inquiry inquiry,
+            Agent author,
+            String content,
+            Instant createdAt) {
+        return new InquiryNote(
+                "note-" + UUID.randomUUID(),
+                inquiry,
+                author,
+                content,
+                createdAt);
     }
 
     public String getId() {

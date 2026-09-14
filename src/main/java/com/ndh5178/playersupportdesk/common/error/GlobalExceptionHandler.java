@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -14,10 +15,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApiValidationException.class)
     public ResponseEntity<ApiErrorResponse> handleValidation(ApiValidationException exception) {
+        ApiErrorResponse body = exception.getDetails().isEmpty()
+                ? ApiErrorResponse.of("VALIDATION_ERROR", exception.getMessage())
+                : ApiErrorResponse.of(
+                        "VALIDATION_ERROR",
+                        exception.getMessage(),
+                        exception.getDetails());
+
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidJson(HttpMessageNotReadableException exception) {
         ApiErrorResponse body = ApiErrorResponse.of(
-                "VALIDATION_ERROR",
-                exception.getMessage(),
-                exception.getDetails());
+                "INVALID_JSON",
+                "올바른 JSON 요청 본문이 필요합니다.");
 
         return ResponseEntity.badRequest().body(body);
     }
