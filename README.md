@@ -14,10 +14,11 @@
 - 문의 목록·상세 및 담당자 조회 API
 - 문의 상태·담당자 변경과 변경 이력 저장 API
 - 운영 메모 등록과 메모 이력 저장 API
+- 문의 상태·SLA·우선순위와 최근 문의를 계산하는 대시보드 API
 - GET /api/health: HTTP 200과 `{"status":"UP"}` 응답
 - 실제 내장 서버를 사용하는 HTTP 통합 테스트
 
-현재 대시보드·인증은 구현 전이다. 별도 Vue 프로젝트는 실제 API 조회 모드를 지원하며 변경 API도 같은 요청 계약으로 호출한다.
+현재 인증은 구현 전이다. 별도 Vue 프로젝트는 실제 API 모드에서 조회·변경·대시보드 API를 같은 요청 계약으로 호출한다.
 health 성공은 문의 조회나 전체 서비스 정상 동작을 보장하지 않는다.
 
 ## Windows PowerShell 실행
@@ -72,6 +73,7 @@ curl.exe "http://localhost:8080/api/inquiries"
 curl.exe "http://localhost:8080/api/inquiries?status=NEW&sort=newest&page=1&limit=10"
 curl.exe "http://localhost:8080/api/inquiries/INQ-2026-0001"
 curl.exe "http://localhost:8080/api/agents"
+curl.exe "http://localhost:8080/api/dashboard"
 ```
 
 잘못된 목록 조건과 없는 문의의 오류 응답도 확인할 수 있다.
@@ -120,7 +122,7 @@ macOS/Linux에서는 `./gradlew`를 사용한다.
 - [검증 기록](docs/QA_CHECKLIST.md)
 - `study/`: Git에서 제외한 개인 학습 문서
 
-대시보드 집계와 Vue 실제 API 모드 전체 흐름 검증은 다음 작업에서 진행한다.
+Vue 실제 API 모드의 전체 흐름 검증과 자동 E2E 테스트는 후속 작업에서 진행한다.
 공개 배포와 인증·권한 검증은 아직 진행하지 않았다.
 
 DB만 중지하려면 `docker compose stop database`, 다시 시작하려면

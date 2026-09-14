@@ -83,6 +83,20 @@ public class InquiryService {
         return createInquiryResponse(inquiry);
     }
 
+    public List<InquiryResponse> getRecentInquiries() {
+        List<Inquiry> inquiries = inquiryRepository.findTop5ByOrderByCreatedAtDescIdDesc();
+        List<String> inquiryIds = inquiries.stream().map(Inquiry::getId).toList();
+        Map<String, List<InquiryHistory>> histories = loadHistories(inquiryIds);
+        Map<String, List<InquiryNote>> notes = loadNotes(inquiryIds);
+
+        return inquiries.stream()
+                .map(inquiry -> InquiryResponse.from(
+                        inquiry,
+                        histories.getOrDefault(inquiry.getId(), List.of()),
+                        notes.getOrDefault(inquiry.getId(), List.of())))
+                .toList();
+    }
+
     @Transactional
     public InquiryResponse updateInquiry(String inquiryId, UpdateInquiryRequest request) {
         Inquiry inquiry = findInquiry(inquiryId);
