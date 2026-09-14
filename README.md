@@ -8,11 +8,14 @@
 ## 현재 구현
 
 - Java 21, Spring Boot 4.1.1, Gradle Wrapper 9.7.1
+- PostgreSQL 17.11, Spring Data JPA, Flyway
+- 고객·담당자·문의·운영 메모·변경 이력 테이블
+- 기존 Mock을 옮긴 로컬 초기 데이터
 - GET /api/health: HTTP 200과 `{"status":"UP"}` 응답
 - 실제 내장 서버를 사용하는 HTTP 통합 테스트
 
-현재 DB·인증·문의 API·Vue 실제 서버 연결은 구현 전이다.
-health 성공은 DB 상태나 전체 서비스 정상 동작을 보장하지 않는다.
+현재 문의 API·인증·Vue 실제 서버 연결은 구현 전이다.
+health 성공은 문의 조회나 전체 서비스 정상 동작을 보장하지 않는다.
 
 ## Windows PowerShell 실행
 
@@ -20,6 +23,25 @@ JDK 21이 필요하다. JAVA_HOME은 JDK 설치 폴더를 가리켜야 한다.
 설치와 환경 변수 변경 후에는 터미널 또는 IDE를 다시 실행한다.
 Gradle은 저장소의 Wrapper를 사용하므로 별도 설치하지 않는다.
 첫 실행에는 Gradle과 의존성을 다운로드할 인터넷 연결이 필요하다.
+
+처음 한 번 로컬 설정 파일을 만든다. `.env`는 Git에 포함되지 않는다.
+
+```powershell
+Copy-Item .env.example .env
+```
+
+`.env`의 `DB_PASSWORD`를 로컬에서 사용할 값으로 바꾼다.
+같은 파일을 Docker Compose와 Spring Boot가 함께 읽는다.
+`APP_PROFILE=local`이면 공통 스키마와 로컬 가상 데이터가 함께 적용된다.
+
+PostgreSQL을 먼저 실행한다.
+
+```powershell
+docker compose up -d database
+```
+
+이 명령은 PostgreSQL 17.11 컨테이너와 데이터 볼륨을 만든다.
+컨테이너를 중지해도 볼륨의 데이터는 유지된다.
 
 ```powershell
 cd C:\Users\ehdgu\Desktop\정글\player-support-desk-api
@@ -57,6 +79,9 @@ macOS/Linux에서는 `./gradlew`를 사용한다.
 - `health/HealthController.java`: 요청 경로와 처리 함수 연결
 - `health/HealthResponse.java`: JSON 응답 데이터 구조
 - `src/main/resources/application.yml`: 앱 이름과 로컬 서버 주소·포트
+- `compose.yaml`: 로컬 PostgreSQL 컨테이너와 데이터 볼륨
+- `src/main/resources/db/migration/`: 모든 환경에서 사용하는 DB 스키마
+- `src/main/resources/db/local/`: local 프로필에서만 넣는 가상 초기 데이터
 - `src/test/`: 자동화 테스트
 - [작업 순서](docs/IMPLEMENTATION_PLAN.md)
 - [DB 컬럼·관계 설계](docs/DATABASE_DESIGN.md)
@@ -66,5 +91,8 @@ macOS/Linux에서는 `./gradlew`를 사용한다.
 - [검증 기록](docs/QA_CHECKLIST.md)
 - `study/`: Git에서 제외한 개인 학습 문서
 
-PostgreSQL·JPA·Flyway·Docker Compose는 다음 DB 연결 작업에서 추가한다.
+문의 조회 API는 다음 작업에서 추가한다.
 공개 배포와 인증·권한 검증은 아직 진행하지 않았다.
+
+DB만 중지하려면 `docker compose stop database`, 다시 시작하려면
+`docker compose start database`를 사용한다. 데이터 볼륨 삭제는 초기화가 필요한 경우에만 별도로 진행한다.
