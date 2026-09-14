@@ -59,6 +59,8 @@ macOS/Linux에서는 `./gradlew`를 사용한다.
 - `src/main/resources/application.yml`: 앱 이름과 로컬 서버 주소·포트
 - `src/test/`: 자동화 테스트
 - [작업 순서](docs/IMPLEMENTATION_PLAN.md)
+- [DB 컬럼·관계 설계](docs/DATABASE_DESIGN.md)
+- [API 계약·Vue 연결 설계](docs/API_CONTRACT.md)
 - [기술 결정](docs/DECISIONS.md)
 - [Git 규칙](docs/GIT_WORKFLOW.md)
 - [검증 기록](docs/QA_CHECKLIST.md)

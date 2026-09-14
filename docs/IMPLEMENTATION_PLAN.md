@@ -1,6 +1,6 @@
 # 구현 순서와 작업 단위
 
-## 현재 작업: chore/project-setup
+## 완료: chore/project-setup (PR #1 병합)
 
 목적: JDK 21과 Gradle로 서버를 실행하고 GET /api/health의 JSON 응답을 확인한다.
 
@@ -11,6 +11,12 @@
 
 이 API는 애플리케이션의 HTTP 응답 확인용이다. DB, 인증, Vue 연결은 포함하지 않는다.
 검증 결과는 QA_CHECKLIST.md에 기록한다.
+
+## 설계 문서: docs/database-api-design
+
+- [DB 설계](DATABASE_DESIGN.md): 5개 테이블의 컬럼·타입·관계·NULL·저장 규칙
+- [API 계약](API_CONTRACT.md): 기존 MSW와 동일한 요청·응답·오류·Vue 연결 방식
+- 설계 기록이며 실제 DB·문의 API 구현 완료를 의미하지 않는다.
 
 ## 다음 작업
 
