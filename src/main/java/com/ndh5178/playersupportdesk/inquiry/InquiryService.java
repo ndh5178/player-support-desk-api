@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.ndh5178.playersupportdesk.agent.Agent;
 import com.ndh5178.playersupportdesk.agent.AgentRepository;
+import com.ndh5178.playersupportdesk.auth.CurrentAgentProvider;
 import com.ndh5178.playersupportdesk.common.error.ApiValidationException;
 import com.ndh5178.playersupportdesk.common.error.InquiryNotFoundException;
 import com.ndh5178.playersupportdesk.inquiry.dto.CreateInquiryNoteRequest;
@@ -33,20 +34,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class InquiryService {
 
-    private static final String CURRENT_AGENT_ID = "agent-001";
-
     private final InquiryRepository inquiryRepository;
     private final AgentRepository agentRepository;
+    private final CurrentAgentProvider currentAgentProvider;
     private final InquiryHistoryRepository historyRepository;
     private final InquiryNoteRepository noteRepository;
 
     public InquiryService(
             InquiryRepository inquiryRepository,
             AgentRepository agentRepository,
+            CurrentAgentProvider currentAgentProvider,
             InquiryHistoryRepository historyRepository,
             InquiryNoteRepository noteRepository) {
         this.inquiryRepository = inquiryRepository;
         this.agentRepository = agentRepository;
+        this.currentAgentProvider = currentAgentProvider;
         this.historyRepository = historyRepository;
         this.noteRepository = noteRepository;
     }
@@ -110,7 +112,7 @@ public class InquiryService {
             return createInquiryResponse(inquiry);
         }
 
-        Agent currentAgent = findCurrentAgent();
+        Agent currentAgent = currentAgentProvider.getCurrentAgent();
         Instant changedAt = Instant.now();
 
         if (statusChanged) {
@@ -147,7 +149,7 @@ public class InquiryService {
     @Transactional
     public InquiryNoteResponse addInquiryNote(String inquiryId, CreateInquiryNoteRequest request) {
         Inquiry inquiry = findInquiry(inquiryId);
-        Agent currentAgent = findCurrentAgent();
+        Agent currentAgent = currentAgentProvider.getCurrentAgent();
         Instant createdAt = Instant.now();
 
         InquiryNote note = InquiryNote.create(
@@ -192,12 +194,6 @@ public class InquiryService {
                 .orElseThrow(() -> new ApiValidationException(
                         "수정할 문의 정보를 확인해 주세요.",
                         Map.of("assigneeId", "존재하는 담당자 ID 또는 null이어야 합니다.")));
-    }
-
-    private Agent findCurrentAgent() {
-        return agentRepository.findById(CURRENT_AGENT_ID)
-                .orElseThrow(() -> new IllegalStateException(
-                        "로컬 작업 담당자를 찾을 수 없습니다: " + CURRENT_AGENT_ID));
     }
 
     private String agentId(Agent agent) {
