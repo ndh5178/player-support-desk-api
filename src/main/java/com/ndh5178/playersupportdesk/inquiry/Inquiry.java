@@ -103,4 +103,16 @@ public class Inquiry {
     public Instant getSlaDueAt() {
         return slaDueAt;
     }
+
+    public void changeStatus(InquiryStatus status) {
+        this.status = status;
+    }
+
+    public void changeAssignee(Agent assignee) {
+        this.assignee = assignee;
+    }
+
+    public void updateTimestamp(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

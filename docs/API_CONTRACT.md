@@ -1,6 +1,6 @@
 # API 계약과 Vue 연결 설계
 
-상태: 문의 목록·상세와 담당자 조회를 구현했다. 변경·메모·대시보드는 구현 전이다.
+상태: 문의 목록·상세·담당자 조회와 문의 변경·메모 등록을 구현했다. 대시보드는 구현 전이다.
 
 ## 확인한 근거
 
@@ -140,6 +140,8 @@ total은 필터 후 전체 개수, totalPages는 ceil(total / limit)이다.
 
 ## PATCH /api/inquiries/{id}
 
+구현됨. `InquiryController.updateInquiry`가 요청 필드의 존재 여부와 값을 검증하고 `InquiryService.updateInquiry`가 변경과 이력 저장을 한 트랜잭션으로 처리한다.
+
 ```json
 { "status": "IN_PROGRESS", "assigneeId": "agent-001" }
 ```
@@ -154,7 +156,7 @@ total은 필터 후 전체 개수, totalPages는 ceil(total / limit)이다.
 - 실제 변경 시 상태·담당자별 이력과 updatedAt을 저장한 뒤 전체 Inquiry를 반환한다.
 - 기존 Mock은 추가로 전달된 알 수 없는 필드를 무시하며, 알려진 필드가 하나도 없으면 실패한다.
 
-입력 예시의 NEW → IN_PROGRESS 변경 흐름(구현 예정):
+입력 예시의 NEW → IN_PROGRESS 변경 흐름:
 
 ```text
 Vue 관리 폼 이벤트
@@ -170,10 +172,11 @@ Vue 관리 폼 이벤트
 → Vue 화면 반영
 ```
 
-아직 Controller·Service·Repository 함수는 구현 전이다. 구현 후 실제 파일과 함수로 학습 문서를 연결한다.
 트랜잭션 실패 시 부분 저장하지 않고 오류를 반환한다.
 
 ## POST /api/inquiries/{id}/notes
+
+구현됨. `InquiryController.addInquiryNote`가 내용을 검증하고 `InquiryService.addInquiryNote`가 메모, `NOTE_ADDED` 이력과 문의 수정 시각을 한 트랜잭션으로 저장한다.
 
 ```json
 { "content": "인증 메일 발송 로그를 확인했습니다." }
